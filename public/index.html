@@ -1,31 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>URL Shortener</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>URL Shortener</h1>
-  <form id="shorten-form">
-    <input type="url" id="url-input" placeholder="Enter a URL" required>
-    <button type="submit">Shorten</button>
-  </form>
-  <div id="result"></div>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <div class="min-h-screen flex flex-col items-center justify-center">
+    <h1 class="text-4xl font-bold mb-8">URL Shortener</h1>
+    <form id="shorten-form" class="w-full max-w-md">
+      <div class="flex items-center border-b-2 border-teal-500 py-2">
+        <input class="appearance-none bg-transparent border-none w-full text-gray-700 dark:text-gray-300 mr-3 py-1 px-2 leading-tight focus:outline-none" type="url" id="url-input" placeholder="Enter a URL to shorten" required>
+        <button class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" type="submit">
+          Shorten
+        </button>
+      </div>
+    </form>
+    <div id="result" class="mt-4 text-lg"></div>
+    <div class="mt-8">
+        <a href="/list.html" class="text-teal-500 hover:text-teal-400">View all shortened URLs</a>
+    </div>
+  </div>
 
   <script>
     document.getElementById('shorten-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       const url = document.getElementById('url-input').value;
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-      });
-      const result = await response.json();
-      if (response.ok) {
-        document.getElementById('result').innerHTML = 
-          `Shortened URL: <a href="/${result.short}" target="_blank">/${result.short}</a>`;
-      } else {
-        document.getElementById('result').innerHTML = `Error: ${result.error}`;
+      try {
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url }),
+        });
+        const result = await response.json();
+        const resultDiv = document.getElementById('result');
+        if (response.ok) {
+          const shortenedUrl = `${window.location.origin}/${result.short}`;
+          resultDiv.innerHTML = 
+            `Shortened URL: <a href="${shortenedUrl}" target="_blank" class="text-teal-500 hover:text-teal-400">${shortenedUrl}</a>`;
+        } else {
+          resultDiv.innerHTML = `<span class="text-red-500">Error: ${result.error || 'An unknown error occurred.'}</span>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<span class="text-red-500">Error: Could not connect to the server.</span>`;
       }
     });
   </script>
